@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="7010" doc:name="HTTP Listener Configuration" protocol="HTTPS">
+        <tls:context>
+            <tls:key-store type="jks" path="ks" keyPassword="ritdumdig" password="ritdumdig"/>
+        </tls:context>
+    </http:listener-config>
+    <http:request-config name="HTTP_Request_Configuration" protocol="HTTPS" host="localhost" port="7010" doc:name="HTTP Request Configuration">
+        <tls:context>
+            <tls:trust-store path="ks" password="ritdumdig" type="jks"/>
+        </tls:context>
+    </http:request-config>
+    <http:listener-config name="HTTP_Listener_Configuration1" host="0.0.0.0" port="7055" doc:name="HTTP Listener Configuration"/>
+    <flow name="https-demoFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration1" path="/cert" doc:name="HTTP"/>
+        <logger level="INFO" doc:name="Logger"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/certin" method="POST" doc:name="HTTP"/>
+        <catch-exception-strategy doc:name="https-demoCatch_Exception_Strategy">
+            <set-payload value="Error: #[exception.cause.?message or exception.cause]" doc:name="Set Payload"/>
+        </catch-exception-strategy>
+    </flow>
+    <flow name="https-demoFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/certin" doc:name="HTTP" allowedMethods="POST"/>
+        <set-payload value="success" doc:name="Set Payload"/>
+    </flow>
+</mule>
